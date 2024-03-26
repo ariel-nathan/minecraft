@@ -98,5 +98,5 @@ window.addEventListener("resize", () => {
 });
 
 setupLights();
-setupGUI(world, player);
+setupGUI(world, player, physics);
 animate();

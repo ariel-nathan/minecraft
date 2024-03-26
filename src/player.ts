@@ -25,6 +25,7 @@ export class Player {
     this.camera.position.set(32, 16, 32);
     scene.add(this.camera);
     scene.add(this.cameraHelper);
+    this.cameraHelper.visible = false;
 
     document.addEventListener("keydown", this.onKeyDown.bind(this));
     document.addEventListener("keyup", this.onKeyUp.bind(this));
