@@ -13,10 +13,12 @@ export class Player {
     200
   );
   controls = new PointerLockControls(this.camera, document.body);
+  cameraHelper = new THREE.CameraHelper(this.camera);
 
   constructor(scene: THREE.Scene) {
     this.camera.position.set(32, 16, 32);
     scene.add(this.camera);
+    scene.add(this.cameraHelper);
 
     document.addEventListener("keydown", this.onKeyDown.bind(this));
     document.addEventListener("keyup", this.onKeyUp.bind(this));
@@ -28,6 +30,12 @@ export class Player {
       this.velocity.z = this.input.z;
       this.controls.moveRight(this.velocity.x * delta);
       this.controls.moveForward(this.velocity.z * delta);
+
+      // TODO: Add toggle for showing coords
+      const playerPositionDiv = document.getElementById("player-position");
+      if (playerPositionDiv) {
+        playerPositionDiv.innerText = this.toString();
+      }
     }
   }
 
@@ -71,5 +79,18 @@ export class Player {
         this.input.x = 0;
         break;
     }
+  }
+
+  toString() {
+    let str = "";
+    str += `X: ${this.position.x.toFixed(3)} `;
+    str += `Y: ${this.position.y.toFixed(3)} `;
+    str += `Z: ${this.position.z.toFixed(3)}`;
+    return str;
+  }
+
+  reset() {
+    this.camera.position.set(32, 16, 32);
+    this.velocity.set(0, 0, 0);
   }
 }
