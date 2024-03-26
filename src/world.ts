@@ -129,6 +129,8 @@ export class World extends THREE.Group {
         );
         mesh.name = block.name;
         mesh.count = 0;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         meshes[block.id] = mesh;
       });
 
