@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
+import { Player } from "./player";
 import "./style.css";
 import { setupGUI } from "./ui";
 import { World } from "./world";
 
 // Stats setup
+// TODO: Add toggle for stats
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
@@ -38,6 +40,9 @@ const world = new World();
 world.generate();
 scene.add(world);
 
+// Player setup
+const player = new Player(scene);
+
 // Light setup
 function setupLights() {
   const sun = new THREE.DirectionalLight();
@@ -63,10 +68,16 @@ function setupLights() {
 }
 
 // Animation loop
+let previousTime = performance.now();
 function animate() {
+  let currentTime = performance.now();
+  let delta = (currentTime - previousTime) / 1000;
   requestAnimationFrame(animate);
-  renderer.render(scene, camera);
+  player.applyInput(delta);
+  renderer.render(scene, player.camera);
   stats.update();
+
+  previousTime = currentTime;
 }
 
 // Resize event listener

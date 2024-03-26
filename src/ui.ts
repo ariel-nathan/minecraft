@@ -5,8 +5,10 @@ import { World } from "./world";
 export function setupGUI(world: World) {
   const gui = new GUI();
 
-  gui.add(world.size, "width", 8, 128, 1).name("Width");
-  gui.add(world.size, "height", 8, 64, 1).name("Height");
+  const worldFolder = gui.addFolder("World");
+  worldFolder.add(world.size, "width", 8, 128, 1).name("Width");
+  worldFolder.add(world.size, "height", 8, 64, 1).name("Height");
+  worldFolder.close();
 
   const terrainFolder = gui.addFolder("Terrain");
   terrainFolder.add(world.params, "seed", 0, 10000, 1).name("Seed");
@@ -15,6 +17,7 @@ export function setupGUI(world: World) {
     .add(world.params.terrain, "magnitude", 0, 1, 0.01)
     .name("Magnitude");
   terrainFolder.add(world.params.terrain, "offset", 0, 1, 0.01).name("Offset");
+  terrainFolder.close();
 
   const resourcesFolder = gui.addFolder("Resources");
   resources.forEach((resource) => {
@@ -31,4 +34,6 @@ export function setupGUI(world: World) {
   resourcesFolder.close();
 
   gui.onChange(() => world.generate());
+
+  gui.close();
 }
