@@ -2,9 +2,14 @@ import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/Addons.js";
 
 export class Player {
+  radius = 0.5; // Half the width of a block
+  height = 1.75; // Just under 2 blocks
+  jumpSpeed = 10;
+  onGround = false;
   maxSpeed = 10;
   input = new THREE.Vector3();
   velocity = new THREE.Vector3();
+  #worldVelocity = new THREE.Vector3();
   // TODO: Add fov slider
   camera = new THREE.PerspectiveCamera(
     75,
@@ -14,6 +19,7 @@ export class Player {
   );
   controls = new PointerLockControls(this.camera, document.body);
   cameraHelper = new THREE.CameraHelper(this.camera);
+  boundsHelper: THREE.Mesh;
 
   constructor(scene: THREE.Scene) {
     this.camera.position.set(32, 16, 32);
@@ -22,6 +28,25 @@ export class Player {
 
     document.addEventListener("keydown", this.onKeyDown.bind(this));
     document.addEventListener("keyup", this.onKeyUp.bind(this));
+
+    this.boundsHelper = new THREE.Mesh(
+      new THREE.CylinderGeometry(this.radius, this.radius, this.height, 16),
+      new THREE.MeshBasicMaterial({ wireframe: true })
+    );
+    scene.add(this.boundsHelper);
+  }
+
+  get worldVelocity() {
+    this.#worldVelocity.copy(this.velocity);
+    this.#worldVelocity.applyEuler(
+      new THREE.Euler(0, this.camera.rotation.y, 0)
+    );
+    return this.#worldVelocity;
+  }
+
+  applyWorldDeltaVelocity(delta: THREE.Vector3) {
+    delta.applyEuler(new THREE.Euler(0, -this.camera.rotation.y, 0));
+    this.velocity.add(delta);
   }
 
   applyInput(delta: number) {
@@ -30,6 +55,7 @@ export class Player {
       this.velocity.z = this.input.z;
       this.controls.moveRight(this.velocity.x * delta);
       this.controls.moveForward(this.velocity.z * delta);
+      this.position.y += this.velocity.y * delta;
 
       // TODO: Add toggle for showing coords
       const playerPositionDiv = document.getElementById("player-position");
@@ -37,6 +63,11 @@ export class Player {
         playerPositionDiv.innerText = this.toString();
       }
     }
+  }
+
+  updateBoundsHelper() {
+    this.boundsHelper.position.copy(this.position);
+    this.boundsHelper.position.y -= this.height / 2;
   }
 
   get position() {
@@ -60,6 +91,11 @@ export class Player {
         break;
       case "KeyD":
         this.input.x = this.maxSpeed;
+        break;
+      case "Space":
+        if (this.onGround) {
+          this.velocity.y += this.jumpSpeed;
+        }
         break;
     }
   }
