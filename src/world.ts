@@ -110,7 +110,7 @@ export class World extends THREE.Group {
           );
           const instanceId = mesh.count;
 
-          if (blockId !== 0) {
+          if (blockId !== blocks.empty.id && !this.isBlockObscured(x, y, z)) {
             matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
             mesh.setMatrixAt(instanceId, matrix);
             mesh.setColorAt(instanceId, new THREE.Color(blockType?.color));
@@ -125,7 +125,7 @@ export class World extends THREE.Group {
   }
 
   getBlock(x: number, y: number, z: number) {
-    if (this.inBounds(x, y, z)) {
+    if (this.isBlockInBounds(x, y, z)) {
       return this.data[x][y][z];
     } else {
       return null;
@@ -133,18 +133,18 @@ export class World extends THREE.Group {
   }
 
   setBlockId(x: number, y: number, z: number, id: number) {
-    if (this.inBounds(x, y, z)) {
+    if (this.isBlockInBounds(x, y, z)) {
       this.data[x][y][z].id = id;
     }
   }
 
   setBlockInstanceId(x: number, y: number, z: number, instanceId: number) {
-    if (this.inBounds(x, y, z)) {
+    if (this.isBlockInBounds(x, y, z)) {
       this.data[x][y][z].instanceId = instanceId;
     }
   }
 
-  inBounds(x: number, y: number, z: number) {
+  isBlockInBounds(x: number, y: number, z: number) {
     return (
       x >= 0 &&
       x < this.size.width &&
@@ -153,5 +153,28 @@ export class World extends THREE.Group {
       z >= 0 &&
       z < this.size.width
     );
+  }
+
+  isBlockObscured(x: number, y: number, z: number) {
+    const up = this.getBlock(x, y + 1, z)?.id ?? blocks.empty.id;
+    const down = this.getBlock(x, y - 1, z)?.id ?? blocks.empty.id;
+    const left = this.getBlock(x + 1, y, z)?.id ?? blocks.empty.id;
+    const right = this.getBlock(x - 1, y, z)?.id ?? blocks.empty.id;
+    const forward = this.getBlock(x, y, z + 1)?.id ?? blocks.empty.id;
+    const back = this.getBlock(x, y, z - 1)?.id ?? blocks.empty.id;
+
+    // If any of the block's sides is exposed, it is not obscured
+    if (
+      up === blocks.empty.id ||
+      down === blocks.empty.id ||
+      left === blocks.empty.id ||
+      right === blocks.empty.id ||
+      forward === blocks.empty.id ||
+      back === blocks.empty.id
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }

@@ -9,7 +9,7 @@ export function setupGUI(world: World) {
 
   const terrainFolder = gui.addFolder("Terrain");
   terrainFolder.add(world.params, "seed", 0, 10000, 1).name("Seed");
-  terrainFolder.add(world.params.terrain, "scale", 1, 100, 1).name("Scale");
+  terrainFolder.add(world.params.terrain, "scale", 10, 100).name("Scale");
   terrainFolder
     .add(world.params.terrain, "magnitude", 0, 1, 0.01)
     .name("Magnitude");
