@@ -4,7 +4,6 @@ import { blocks, resources } from "./blocks";
 import { RNG } from "./rng";
 
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshLambertMaterial();
 
 export class World extends THREE.Group {
   size: { width: number; height: number };
@@ -114,32 +113,46 @@ export class World extends THREE.Group {
     this.clear();
 
     const maxMeshCount = this.size.width * this.size.width * this.size.height;
-    const mesh = new THREE.InstancedMesh(geometry, material, maxMeshCount);
-    mesh.count = 0;
+
+    // Create a lookup table where the key is the block id
+    const meshes: {
+      [key: number]: THREE.InstancedMesh;
+    } = {};
+
+    Object.values(blocks)
+      .filter((block) => block.id !== blocks.empty.id)
+      .forEach((block) => {
+        const mesh = new THREE.InstancedMesh(
+          geometry,
+          block.material,
+          maxMeshCount
+        );
+        mesh.name = block.name;
+        mesh.count = 0;
+        meshes[block.id] = mesh;
+      });
 
     const matrix = new THREE.Matrix4();
 
     for (let x = 0; x < this.size.width; x++) {
       for (let y = 0; y < this.size.height; y++) {
         for (let z = 0; z < this.size.width; z++) {
-          const blockId = this.getBlock(x, y, z)?.id;
-          const blockType = Object.values(blocks).find(
-            (block) => block.id === blockId
-          );
+          const block = this.getBlock(x, y, z);
+
+          if (!block || block.id === blocks.empty.id) continue;
+
+          const mesh = meshes[block.id];
           const instanceId = mesh.count;
 
-          if (blockId !== blocks.empty.id && !this.isBlockObscured(x, y, z)) {
-            matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
-            mesh.setMatrixAt(instanceId, matrix);
-            mesh.setColorAt(instanceId, new THREE.Color(blockType?.color));
-            this.setBlockInstanceId(x, y, z, instanceId);
-            mesh.count++;
-          }
+          matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
+          mesh.setMatrixAt(instanceId, matrix);
+          this.setBlockInstanceId(x, y, z, instanceId);
+          mesh.count++;
         }
       }
     }
 
-    this.add(mesh);
+    this.add(...Object.values(meshes));
   }
 
   getBlock(x: number, y: number, z: number) {
