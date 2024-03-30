@@ -19,8 +19,8 @@ export function setupGUI(world: World, player: Player, physics: Physics) {
   physicsFolder.close();
 
   const worldFolder = gui.addFolder("World");
-  worldFolder.add(world.size, "width", 8, 128, 1).name("Width");
-  worldFolder.add(world.size, "height", 8, 64, 1).name("Height");
+  worldFolder.add(world.chunkSize, "width", 8, 128, 1).name("Width");
+  worldFolder.add(world.chunkSize, "height", 8, 64, 1).name("Height");
   worldFolder.close();
 
   const terrainFolder = gui.addFolder("Terrain");
