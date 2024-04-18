@@ -1,8 +1,10 @@
 import * as THREE from "three";
+import { Player } from "./player";
 import { WorldChunk } from "./world-chunk";
 
 export class World extends THREE.Group {
   seed: number;
+  drawDistance = 1;
   chunkSize = { width: 64, height: 32 };
   params = {
     seed: 0,
@@ -34,6 +36,42 @@ export class World extends THREE.Group {
         this.add(chunk);
       }
     }
+  }
+
+  update(player: Player) {
+    const visibleChunks = this.getVisibleChunks(player);
+
+    console.log(visibleChunks);
+
+    return null;
+  }
+
+  getVisibleChunks(player: Player) {
+    const visibleChunks: { x: number; z: number }[] = [];
+
+    const coords = this.worldToChunkCoords(
+      player.position.x,
+      player.position.y,
+      player.position.z
+    );
+
+    const { x: chunkX, z: chunkZ } = coords.chunk;
+
+    for (
+      let x = chunkX - this.drawDistance;
+      x <= chunkX + this.drawDistance;
+      x++
+    ) {
+      for (
+        let z = chunkZ - this.drawDistance;
+        z <= chunkZ + this.drawDistance;
+        z++
+      ) {
+        visibleChunks.push({ x, z });
+      }
+    }
+
+    return visibleChunks;
   }
 
   getBlock(x: number, y: number, z: number) {
